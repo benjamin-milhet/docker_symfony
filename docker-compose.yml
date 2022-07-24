@@ -1,0 +1,53 @@
+version: "3.8"
+services:
+
+  db:
+    image: mysql
+    container_name: db_docker_symfony
+    restart: always
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    networks:
+      - dev
+    ports:
+        - "8889:8889"
+
+  phpmyadmin:
+      image: phpmyadmin
+      container_name: phpmyadmin_docker_symfony
+      restart: always
+      depends_on:
+        - db
+      ports:
+        - 8080:80
+      environment:
+        PMA_HOST: db
+      networks:
+        - dev
+
+  www:
+    build: php_docker
+    container_name: www_docker_symfony
+    ports:
+      - "9090:80"
+    volumes:
+      - ./php_docker/vhosts:/etc/apache2/sites-enabled
+      - ./:/var/www/
+    restart: always
+    networks:
+      - dev
+
+  wkhtmltopdf:
+    image: openlabs/docker-wkhtmltopdf-aas
+    container_name: pdf_docker_symfony
+    volumes:
+      - .:/data
+
+
+networks:
+  dev:
+
+volumes:
+  db-data:
